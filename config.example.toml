@@ -1,0 +1,26 @@
+# Copy to <data dir>/config.toml (see `dai config`) or pass --config PATH.
+# Every key is optional; precedence: defaults < this file < DAI_<KEY> env vars < CLI flags.
+
+# --- sources -------------------------------------------------------------
+providers = ["wikipedia"]        # wikipedia | searxng | brave
+# searxng_url = "http://localhost:8888"   # instance must allow format=json
+# brave_key = ""                          # or set BRAVE_API_KEY
+max_sources = 8
+
+# --- politeness / safety --------------------------------------------------
+rate_delay = 1.0                 # seconds between requests to the same host
+respect_robots = true
+timeout = 15.0
+max_bytes = 2000000
+cache_ttl = 86400                # seconds a cached page is considered fresh
+
+# --- output ---------------------------------------------------------------
+output_language = "auto"         # auto = language of the question | en | tr
+max_statements = 10
+
+# --- analysis thresholds (advanced) ----------------------------------------
+# agree_j = 0.75
+# overlap_j = 0.35
+# neg_j = 0.45
+# cluster_j = 0.50
+# conf_prior = 0.5               # higher = more conservative confidence

@@ -1,0 +1,118 @@
+# D-AI Roadmap (Generation 1)
+
+Scope: D-AI generation 1 only. **D-AI 2.0 is out of scope** and is not planned here.
+
+Rules for every phase:
+
+- A phase starts only after the previous phase's exit criteria are met **and** you approve.
+- No dependency is installed without explicit approval.
+- Nothing outside the `D-AI/` directory is modified.
+- Each phase ends with: tests passing on Linux + Termux (Windows when available), docs updated.
+
+## Status
+
+Phases 0 to 8 are implemented in v1.0.0 and covered by 69 offline tests. Phase 9 is partly done:
+the documentation is complete, but Windows/Termux/Python 3.13 verification, calibration on
+labelled real-world data, and a security review remain **open** (see ARCHITECTURE.md, Appendix B).
+
+## Phase 0: Design (done)
+
+Deliverables: `ARCHITECTURE.md`, `ROADMAP.md`, `README.md`, proposed structure.
+
+Exit criteria: you approve the architecture and answer the open decisions
+(search provider, test runner, packaging, output language, fate of the prototype).
+
+## Phase 1: Foundation
+
+- `pyproject.toml` (stdlib-only runtime), `src/dai/` skeleton, `python -m dai`
+- `core/models.py`, `config.py` (layered), `paths.py`, `errors.py`
+- `storage/db.py` + schema, `i18n/tokenize.py` + en/tr stop-word files
+- CLI skeleton with subcommands (no logic yet), UTF-8 stdout handling
+- Test harness and import-rule test
+
+Exit: `dai --help` works on Termux and Linux; DB create/open/close tested; tokenizer tests pass
+for English and Turkish.
+
+## Phase 2: Discovery, ingestion, extraction
+
+- `discovery`: `manual_urls` provider and one approved search provider
+- `ingest`: fetcher, robots.txt, rate limit, content-addressed cache, SSRF guard, size/time caps
+- `extract`: main-text extraction and metadata (title, author, date, publisher, language)
+- Commands: `dai fetch`
+
+Exit: fixture pages extract correctly; cache hit/miss tested; unsafe URLs rejected;
+fully offline test run.
+
+## Phase 3: Claims
+
+- Sentence segmentation (abbreviation-aware, Turkish and English)
+- Claim typing (fact / quote / opinion / forecast), subject/predicate/value extraction
+- Number, unit and date normalization
+- Command: `dai claims`
+
+Exit: labeled sample of at least 200 sentences, claim extraction precision reported and
+documented; known failure modes listed in the docs.
+
+## Phase 4: Trust
+
+- Subscores, domain tiers (default file plus user-editable), explainable `TrustReport`
+- Command: `dai trust`, `dai sources`
+- Calibration: small hand-labeled set of domains/pages to tune weights
+
+Exit: scores reproducible; each score lists contributing signals; weights documented as heuristic.
+
+## Phase 5: Analysis
+
+- Clustering (deterministic), ordered relation rules, independence detection
+- Evaluation set of labeled claim pairs; precision/recall tracked per relation kind
+
+Exit: contradiction/update/agreement metrics reported; regression tests for each known failure
+(e.g. negation vs high overlap, empty subject, syndicated copies).
+
+## Phase 6: Synthesis and rendering
+
+- Aggregation, confidence model, statement selection and ranking
+- Shared reference registry; JSON renderer (stable schema, versioned); text renderer
+- Command: `dai research --url ...`
+
+Exit: end-to-end run from fixtures produces golden JSON and text; schema documented.
+
+## Phase 7: Pipeline integration and audit
+
+- Orchestrator with warnings, partial-failure handling, per-stage timing and stats
+- Full `runs` persistence, command: `dai audit`, reproducible re-run from cache
+- Meaningful exit codes
+
+Exit: any past run can be inspected and re-rendered offline.
+
+## Phase 8: Agent layer
+
+- Tool interfaces, deterministic planner/state machine, budgets and stop rules
+- Follow-up search on contradictions or low independence, full step logging
+- Command: `dai research --agent`
+
+Exit: agent runs are reproducible given cache; budget limits enforced; every step in the audit trail.
+
+## Phase 9: Hardening and 1.0
+
+- Windows verification, Termux install guide, performance pass on pure-Python hot spots
+- Security review (network, parsing, storage), documentation completion, versioned release 1.0
+
+Exit: install and run documented on all three platforms; known limitations section current.
+
+## Deliberately not in this roadmap
+
+- Language models, embeddings, neural semantic matching
+- JavaScript rendering, paywall bypass, login automation
+- GUI or web frontend
+- Anything belonging to D-AI 2.0
+
+## Decision gates (need your input)
+
+| Gate | Needed before |
+|---|---|
+| Approve architecture and open decisions | Phase 1 |
+| Search provider and any API key handling | Phase 2 |
+| Test runner (`unittest` vs `pytest`) | Phase 1 |
+| Any third-party dependency, one by one | The phase that needs it |
+| Public release and license | Phase 9 |
